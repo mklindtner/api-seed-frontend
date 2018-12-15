@@ -12,6 +12,11 @@ export class ModalEditItem extends Component {
         this.props.history.push('/table');
     }
 
+    handleAccept = () => {
+        //add fetch to update and give update    
+        this.props.history.push('/table');
+    }
+
     render() {
         return (
             <div className="static-modal">

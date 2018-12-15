@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import {get} from './FetchCRUD';
+//import {get} from './FetchCRUD';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import * as ReactBootstrap from 'react-bootstrap';
 import { withRouter } from "react-router";
+import { getAnyObjectAll } from './implementedFetch/AnyObjectFetch';
 
 export class GenericTable extends Component {
     constructor(props) {
@@ -11,7 +12,7 @@ export class GenericTable extends Component {
     }
 
     async componentDidMount() {
-        const valueHeader = await get("anyObject2");
+        const valueHeader = await getAnyObjectAll(); //impFetch
         const value = await valueHeader.json();
         this.setState({
             anyObject: value
@@ -23,28 +24,53 @@ export class GenericTable extends Component {
     }
 
     updateItem = (id) => {
-        this.props.history.push('/edit/'+ id);
+        this.props.history.push('/edit/' + id);
+    }
+
+    tableHeadersAndCell = () => {
+        let result = Object.keys(this.state.anyObject[0]);
+        let columns = result.map((colName, key) => {
+            if (colName == "id") {
+                return (
+                    <TableHeaderColumn key={key} isKey dataField={colName}>Product {colName}</TableHeaderColumn>
+                );
+            }
+            return (
+                <TableHeaderColumn key={key} dataField={colName}>{colName}</TableHeaderColumn>
+            )
+        });
+        return columns;
     }
 
 
     buttonFormatter = (cell, row) => {
         return (<>
-        <ReactBootstrap.Button bsStyle="primary" onClick={() => this.goToItem(row.id)}>details</ReactBootstrap.Button>
-        <ReactBootstrap.Button onClick={() => this.updateItem(row.id)}>edit</ReactBootstrap.Button> 
+            <ReactBootstrap.Button bsStyle="primary" onClick={() => this.goToItem(row.id)}>details</ReactBootstrap.Button>
+            <ReactBootstrap.Button onClick={() => this.updateItem(row.id)}>edit</ReactBootstrap.Button>
         </>
         );
     }
-    //<ReactBootstrap.Button bsStyle="danger" onClick={() => this.goToItem(row.id)}>delete</ReactBootstrap.Button> 
-    //add datafield (props) of object here   
+    
     render() {
-        return (
-            <BootstrapTable data={this.state.anyObject}>
-                <TableHeaderColumn isKey dataField='id'>Product ID</TableHeaderColumn>
-                <TableHeaderColumn dataField='name'>Product Name</TableHeaderColumn>
-                <TableHeaderColumn dataField='edit' dataFormat={this.buttonFormatter}>Button</TableHeaderColumn>
-            </BootstrapTable>
-        );
+        const headers = this.tableHeadersAndCell
+        if (this.state.anyObject[0] == null)
+            return "ok";
+        else {
+            return (
+                <BootstrapTable data={this.state.anyObject}>
+                    {this.tableHeadersAndCell()}
+                    <TableHeaderColumn dataField='edit' dataFormat={this.buttonFormatter}>Button</TableHeaderColumn>
+                </BootstrapTable>
+            );
+        }
+
     }
 }
+
+/* avoiding child warning; hardcode values instead of tablHeadersAndCell
+  <TableHeaderColumn isKey dataField='id'>Product ID</TableHeaderColumn>
+  <TableHeaderColumn dataField='name'>Product Name</TableHeaderColumn>
+
+*/
 
 export default withRouter(GenericTable);
